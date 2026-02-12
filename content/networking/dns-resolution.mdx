@@ -1,0 +1,72 @@
+---
+title: DNS Resolution
+date: 2026-02-08
+---
+
+<CornellNote
+  summary="DNS translates domain names to IP addresses through a hierarchical lookup: recursive resolver, root server, TLD server, authoritative server. Caching at each level improves performance. TTL values control cache duration."
+  tags={['networking', 'dns', 'infrastructure']}
+>
+  <Cues>
+    - What are the steps in DNS resolution?
+    - What is a recursive resolver?
+    - Root servers vs authoritative servers?
+    - How does DNS caching work?
+    - What are common DNS record types?
+  </Cues>
+  <Notes>
+    ## DNS Overview
+
+    The **Domain Name System** (DNS) translates human-readable domain names (e.g., `example.com`) into IP addresses (e.g., `93.184.216.34`). It is a hierarchical, distributed database.
+
+    ## Resolution Process
+
+    ```
+    Browser --> Recursive Resolver --> Root Server (.com)
+                                    --> TLD Server (.com)
+                                    --> Authoritative Server (example.com)
+                                    --> IP Address returned
+    ```
+
+    1. **Browser cache** -- Check local cache first
+    2. **OS resolver** -- Check system DNS cache
+    3. **Recursive resolver** -- ISP or configured resolver (e.g., 8.8.8.8)
+    4. **Root server** -- Directs to TLD server (13 root server clusters globally)
+    5. **TLD server** -- Directs to authoritative server for the domain
+    6. **Authoritative server** -- Returns the actual DNS record
+
+    ## Common Record Types
+
+    | Type | Purpose | Example |
+    |---|---|---|
+    | A | IPv4 address | `93.184.216.34` |
+    | AAAA | IPv6 address | `2606:2800:220:1:...` |
+    | CNAME | Alias to another domain | `www` -> `example.com` |
+    | MX | Mail server | `mail.example.com` |
+    | TXT | Arbitrary text | SPF, DKIM records |
+    | NS | Name server | `ns1.example.com` |
+
+    ## Caching and TTL
+
+    Each DNS record has a **TTL** (Time To Live) value:
+
+    - Measured in seconds (e.g., 3600 = 1 hour)
+    - Each resolver caches the record until TTL expires
+    - Lower TTL = faster propagation of changes, more queries
+    - Higher TTL = fewer queries, slower propagation
+
+    ## Troubleshooting Commands
+
+    ```bash
+    # Query DNS records
+    dig example.com A
+    dig example.com MX
+
+    # Trace the full resolution path
+    dig +trace example.com
+
+    # Check specific nameserver
+    nslookup example.com 8.8.8.8
+    ```
+  </Notes>
+</CornellNote>

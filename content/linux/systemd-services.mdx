@@ -1,0 +1,108 @@
+---
+title: systemd Services
+date: 2026-02-04
+---
+
+<CornellNote
+  summary="systemd manages services via unit files. systemctl start/stop/enable/disable controls service lifecycle. Unit files define ExecStart, dependencies, and restart policies. journalctl reads service logs."
+  tags={['linux', 'services', 'administration']}
+>
+  <Cues>
+    - What is a unit file?
+    - start vs enable -- what is the difference?
+    - How to check why a service failed?
+    - What restart policies are available?
+    - Where are unit files stored?
+  </Cues>
+  <Notes>
+    ## systemd Overview
+
+    **systemd** is the init system and service manager for most modern Linux distributions. It manages:
+
+    - Service startup and shutdown
+    - Dependencies between services
+    - Logging (via journald)
+    - Timers (cron replacement)
+
+    ## Essential systemctl Commands
+
+    ```bash
+    # Service control
+    systemctl start nginx        # Start now
+    systemctl stop nginx         # Stop now
+    systemctl restart nginx      # Stop + Start
+    systemctl reload nginx       # Reload config without restart
+
+    # Boot behavior
+    systemctl enable nginx       # Start on boot
+    systemctl disable nginx      # Do not start on boot
+    systemctl enable --now nginx # Enable AND start immediately
+
+    # Status
+    systemctl status nginx       # Show current state + recent logs
+    systemctl is-active nginx    # Quick check: active/inactive
+    systemctl is-enabled nginx   # Quick check: enabled/disabled
+    ```
+
+    ## Unit File Structure
+
+    Unit files live in `/etc/systemd/system/` (custom) or `/lib/systemd/system/` (package-installed).
+
+    ```ini
+    [Unit]
+    Description=My Application
+    After=network.target
+    Wants=postgresql.service
+
+    [Service]
+    Type=simple
+    User=appuser
+    WorkingDirectory=/opt/myapp
+    ExecStart=/opt/myapp/bin/start
+    ExecReload=/bin/kill -HUP $MAINPID
+    Restart=on-failure
+    RestartSec=5
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+    ## Key Sections
+
+    | Section | Purpose |
+    |---|---|
+    | `[Unit]` | Description, dependencies, ordering |
+    | `[Service]` | How to run: exec, user, restart policy |
+    | `[Install]` | When to start (boot target) |
+
+    ## Restart Policies
+
+    | Policy | Restarts on... |
+    |---|---|
+    | `no` | Never restart |
+    | `on-failure` | Non-zero exit, signal, timeout |
+    | `on-abnormal` | Signal, timeout only |
+    | `always` | Any stop (including clean exit) |
+
+    ## Viewing Logs with journalctl
+
+    ```bash
+    # Service logs
+    journalctl -u nginx              # All logs for nginx
+    journalctl -u nginx --since today # Today only
+    journalctl -u nginx -f           # Follow (live tail)
+
+    # System-wide
+    journalctl -b                    # Current boot
+    journalctl --disk-usage          # Check log storage
+    ```
+
+    ## After Editing Unit Files
+
+    ```bash
+    # Always reload after changes
+    systemctl daemon-reload
+    systemctl restart myapp
+    ```
+  </Notes>
+</CornellNote>

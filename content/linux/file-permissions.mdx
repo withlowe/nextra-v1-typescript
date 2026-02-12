@@ -1,0 +1,85 @@
+---
+title: File Permissions
+date: 2026-02-06
+---
+
+<CornellNote
+  summary="Linux file permissions use a 3-tier model: owner, group, others. Each tier has read (4), write (2), execute (1) bits. chmod changes permissions, chown changes ownership. Special permissions include setuid, setgid, and sticky bit."
+  tags={['linux', 'security', 'filesystem']}
+>
+  <Cues>
+    - What do r, w, x mean for files vs directories?
+    - How does octal notation work?
+    - chmod vs chown?
+    - What is the sticky bit?
+    - How to read `ls -l` output?
+  </Cues>
+  <Notes>
+    ## Permission Model
+
+    Every file and directory has three permission tiers:
+
+    - **Owner (u)** -- the user who owns the file
+    - **Group (g)** -- users in the file's group
+    - **Others (o)** -- everyone else
+
+    Each tier has three permission bits:
+
+    | Bit | Files | Directories |
+    |---|---|---|
+    | **r** (read, 4) | Read contents | List contents |
+    | **w** (write, 2) | Modify contents | Create/delete files |
+    | **x** (execute, 1) | Run as program | Enter (cd into) |
+
+    ## Reading `ls -l` Output
+
+    ```bash
+    -rwxr-xr-- 1 alice devs 4096 Feb 6 10:00 script.sh
+    │└┬┘└┬┘└┬┘
+    │ │   │   └── Others: read only
+    │ │   └────── Group: read + execute
+    │ └────────── Owner: read + write + execute
+    └──────────── Type: - (file), d (directory), l (link)
+    ```
+
+    ## Octal Notation
+
+    Each tier sums its permission values:
+
+    ```
+    rwx = 4+2+1 = 7
+    r-x = 4+0+1 = 5
+    r-- = 4+0+0 = 4
+
+    chmod 754 script.sh
+    # Owner: rwx (7), Group: r-x (5), Others: r-- (4)
+    ```
+
+    ## Key Commands
+
+    ```bash
+    # Change permissions
+    chmod 755 file.sh          # Octal
+    chmod u+x file.sh          # Symbolic: add execute for owner
+    chmod go-w file.sh         # Remove write from group and others
+    chmod -R 644 ./docs/       # Recursive
+
+    # Change ownership
+    chown alice file.sh        # Change owner
+    chown alice:devs file.sh   # Change owner and group
+    chown -R alice:devs ./dir/ # Recursive
+    ```
+
+    ## Special Permissions
+
+    - **setuid (4xxx)** -- File executes as its owner, not the caller
+    - **setgid (2xxx)** -- File executes as its group; new files in dir inherit group
+    - **Sticky bit (1xxx)** -- Only owner can delete files in directory (e.g., `/tmp`)
+
+    ```bash
+    chmod 4755 program    # setuid
+    chmod 2755 shared/    # setgid
+    chmod 1755 /tmp       # sticky bit
+    ```
+  </Notes>
+</CornellNote>

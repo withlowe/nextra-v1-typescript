@@ -1,0 +1,75 @@
+---
+title: TCP/IP Fundamentals
+date: 2026-02-10
+---
+
+<CornellNote
+  summary="TCP provides reliable, ordered delivery over IP. The 3-way handshake (SYN, SYN-ACK, ACK) establishes connections. Flow control uses sliding windows. UDP trades reliability for speed."
+  tags={['networking', 'protocols', 'tcp']}
+>
+  <Cues>
+    - What is the 3-way handshake?
+    - How does flow control work?
+    - TCP vs UDP -- when to use each?
+    - What happens during connection teardown?
+    - What is the sliding window protocol?
+  </Cues>
+  <Notes>
+    ## TCP/IP Overview
+
+    TCP (Transmission Control Protocol) operates at the **transport layer** (Layer 4) of the OSI model. It provides:
+
+    - **Reliable delivery** -- guarantees packets arrive
+    - **Ordered delivery** -- packets reassembled in sequence
+    - **Error checking** -- checksums detect corruption
+    - **Flow control** -- prevents sender from overwhelming receiver
+
+    ## The 3-Way Handshake
+
+    Connection establishment uses three steps:
+
+    ```
+    Client              Server
+      |--- SYN ----------->|
+      |<-- SYN-ACK --------|
+      |--- ACK ----------->|
+      |                     |
+      |   Connection Open   |
+    ```
+
+    1. **SYN** -- Client sends synchronize request with initial sequence number
+    2. **SYN-ACK** -- Server acknowledges and sends its own sequence number
+    3. **ACK** -- Client acknowledges server's sequence number
+
+    ## Flow Control: Sliding Window
+
+    The **sliding window** mechanism controls data flow:
+
+    - Receiver advertises a **window size** (buffer capacity)
+    - Sender transmits up to window size bytes before waiting for ACK
+    - Window "slides" forward as ACKs arrive
+    - If receiver is overwhelmed, it shrinks the window (can reach zero)
+
+    ## TCP vs UDP
+
+    | Feature | TCP | UDP |
+    |---|---|---|
+    | Reliability | Guaranteed delivery | Best-effort |
+    | Ordering | Ordered | No ordering |
+    | Connection | Connection-oriented | Connectionless |
+    | Speed | Slower (overhead) | Faster |
+    | Use case | HTTP, SSH, email | DNS, streaming, gaming |
+
+    ## Connection Teardown (4-Way)
+
+    ```
+    Client              Server
+      |--- FIN ----------->|
+      |<-- ACK ------------|
+      |<-- FIN ------------|
+      |--- ACK ----------->|
+      |                     |
+      |  Connection Closed  |
+    ```
+  </Notes>
+</CornellNote>
